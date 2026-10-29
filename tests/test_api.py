@@ -93,6 +93,43 @@ def test_director_approves_a_manager_over_limit_invoice(client: TestClient):
     assert body["amount"] == "75000.00"
 
 
+def test_two_directors_are_required_above_500000_and_the_same_user_does_not_count_twice(
+    client: TestClient,
+):
+    director = login(client, "demo.director")
+    invoice_id = create_and_submit(client, director, "750000.00", "Capital Program")
+
+    first = client.post(f"/api/approvals/{invoice_id}/approve", headers=director)
+    assert first.status_code == 200
+    assert first.json()["status"] == "PendingApproval"
+    assert [vote["username"] for vote in first.json()["approvals"]] == ["demo.director"]
+    assert first.json()["decidedBy"] is None
+
+    again = client.post(f"/api/approvals/{invoice_id}/approve", headers=director)
+    assert again.status_code == 400
+    assert "same user" in again.json()["error"]
+    after_same_user = client.get(f"/api/invoices/{invoice_id}", headers=director).json()
+    assert after_same_user["status"] == "PendingApproval"
+    assert [vote["username"] for vote in after_same_user["approvals"]] == ["demo.director"]
+
+    manager = login(client, "demo.manager")
+    second_wrong_role = client.post(f"/api/approvals/{invoice_id}/approve", headers=manager)
+    assert second_wrong_role.status_code == 400
+    assert "must be a director" in second_wrong_role.json()["error"]
+    still_pending = client.get(f"/api/invoices/{invoice_id}", headers=director).json()
+    assert still_pending["approvals"] == after_same_user["approvals"]
+    assert still_pending["status"] == "PendingApproval"
+
+    director_two = login(client, "demo.director2")
+    finished = client.post(f"/api/approvals/{invoice_id}/approve", headers=director_two)
+    assert finished.status_code == 200
+    assert finished.json()["status"] == "Approved"
+    assert [vote["username"] for vote in finished.json()["approvals"]] == [
+        "demo.director",
+        "demo.director2",
+    ]
+
+
 def test_blank_rejection_leaves_the_invoice_pending(client: TestClient):
     headers = login(client, "demo.manager")
     before = client.get("/api/invoices/INV-1001", headers=headers).json()

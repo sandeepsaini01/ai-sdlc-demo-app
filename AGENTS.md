@@ -2,16 +2,18 @@
 
 Invoice approval demo. The assignment solution is the Python service in `invoice_app`. The original .NET app remains in `backend` for reference.
 
-## Approval rules in this step
-
-Single-approver ceilings only. Do not add the two-approver rule in this step.
+## Approval rules
 
 - A manager may sole-approve an invoice up to 50,000.00, inclusive.
 - A director may sole-approve an invoice up to 500,000.00, inclusive.
-- Above either ceiling, the approval is refused.
-- Approver and Admin are not approval authorities.
+- An amount above 500,000.00 needs two approvals from two different directors. The first vote stays pending. The second vote, from a different director, approves the invoice.
+- A manager cannot vote on an invoice above 50,000.00, including as the first or second vote on an invoice above 500,000.00.
+- The same user may never count as both approvers. Trimming spaces does not make a second username.
+- Approver and Admin are not approval authorities. Admin may delete an invoice.
 - A refused approval returns a clear reason and writes nothing. Status, amount, approver, timestamp, note, and recorded votes stay as they were.
 - The approver's role comes from the server session. Ignore any role sent in the request body.
+
+A first director vote on an invoice above 500,000.00 is a successful write: one recorded vote, status still `PendingApproval`, `decidedBy` still empty. That is not a refusal.
 
 ## Layout
 

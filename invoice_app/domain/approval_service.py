@@ -39,11 +39,12 @@ def format_amount(amount: Decimal) -> str:
 
 
 class ApprovalService:
-    """Invoice lifecycle and single-approver role ceilings.
+    """Invoice lifecycle and role limits.
 
     A manager may sole-approve an invoice up to 50,000.
     A director may sole-approve an invoice up to 500,000.
-    A refused vote leaves the invoice unchanged.
+    Above 500,000, two different directors must approve. The second vote
+    completes the approval. Any refused vote leaves the invoice unchanged.
     """
 
     def __init__(self, repository: InvoiceRepository, clock: Clock | None = None) -> None:
@@ -88,8 +89,51 @@ class ApprovalService:
             return invoice
 
     def _decide(self, invoice: Invoice, username: str, role: Role) -> _Decision:
+        existing = tuple(invoice.approvals)
+        if invoice.amount > DIRECTOR_LIMIT:
+            return self._decide_dual(invoice, username, role, existing)
         self._ensure_sole_allowed(invoice, role)
-        return self._completed(username, role, tuple(invoice.approvals))
+        return self._completed(username, role, existing)
+
+    def _decide_dual(
+        self,
+        invoice: Invoice,
+        username: str,
+        role: Role,
+        existing: tuple[Approval, ...],
+    ) -> _Decision:
+        if any(vote.username == username for vote in existing):
+            raise ApprovalDenied(
+                f"The same user may never count as both approvers on invoice {invoice.id}. "
+                "This approval was rejected and the invoice was left unchanged."
+            )
+        if role != Role.DIRECTOR:
+            if existing:
+                raise ApprovalDenied(
+                    f"The second approver on invoice {invoice.id} must be a director. "
+                    f"{username} is a {role.value}, so this approval was rejected "
+                    "and the invoice was left unchanged."
+                )
+            raise ApprovalDenied(self._opening_vote_denied(invoice, role))
+        if len(existing) >= 2:
+            raise InvoiceConflict(
+                f"Invoice {invoice.id} already has two approvals; it cannot take another vote."
+            )
+        vote = Approval(username=username, role=role.value, decided_at=self._clock())
+        votes = existing + (vote,)
+        if len(existing) == 0:
+            return _Decision(
+                approvals=votes,
+                status=InvoiceStatus.PENDING_APPROVAL,
+                decided_by=None,
+                decided_at=None,
+            )
+        return _Decision(
+            approvals=votes,
+            status=InvoiceStatus.APPROVED,
+            decided_by=username,
+            decided_at=vote.decided_at,
+        )
 
     def _ensure_sole_allowed(self, invoice: Invoice, role: Role) -> None:
         if role == Role.MANAGER and invoice.amount <= MANAGER_LIMIT:
@@ -102,12 +146,6 @@ class ApprovalService:
         if role == Role.MANAGER:
             return (
                 f"A manager may approve invoices up to {format_amount(MANAGER_LIMIT)}. "
-                f"Invoice {invoice.id} is {format_amount(invoice.amount)}, so this approval "
-                "was rejected and the invoice was left unchanged."
-            )
-        if role == Role.DIRECTOR:
-            return (
-                f"A director may approve invoices up to {format_amount(DIRECTOR_LIMIT)}. "
                 f"Invoice {invoice.id} is {format_amount(invoice.amount)}, so this approval "
                 "was rejected and the invoice was left unchanged."
             )

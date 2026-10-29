@@ -2,7 +2,7 @@
 
 Python invoice approval service added alongside the workshop demo.
 
-A manager may sole-approve up to 50,000. A director may sole-approve up to 500,000. A refused approval explains why and does not change the invoice.
+A manager may sole-approve up to 50,000. A director may sole-approve up to 500,000. Above 500,000, two different directors must approve. A refused approval explains why and does not change the invoice.
 
 ## Run the Python app
 
@@ -18,6 +18,7 @@ Open http://127.0.0.1:5000. Demo password for every account: `ChangeMe123!`
 | --- | --- |
 | `demo.manager` | Manager, ceiling 50,000 |
 | `demo.director` | Director, ceiling 500,000 |
+| `demo.director2` | Second director for invoices above 500,000 |
 | `demo.approver` | No approval authority |
 | `demo.admin` | Can delete, cannot approve |
 
