@@ -1,19 +1,27 @@
-import { defineConfig, devices } from '@playwright/test';
+import path from "node:path";
+import { defineConfig, devices } from "@playwright/test";
+
+const root = path.join(__dirname, "..");
+const python =
+  process.platform === "win32"
+    ? path.join(root, ".venv", "Scripts", "python.exe")
+    : path.join(root, ".venv", "bin", "python");
 
 export default defineConfig({
-  testDir: './tests',
+  testDir: "./tests",
   workers: 1,
   retries: process.env.CI ? 1 : 0,
-  reporter: [['list'], ['html', { open: 'never' }]],
+  reporter: [["list"], ["html", { open: "never" }]],
   use: {
-    baseURL: 'http://localhost:5000',
-    trace: 'on-first-retry',
+    baseURL: "http://127.0.0.1:5000",
+    trace: "on-first-retry",
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: 'dotnet run --project ../backend/src/InvoiceApp.Api',
-    url: 'http://localhost:5000',
-    reuseExistingServer: true,
+    command: `"${python}" -m uvicorn invoice_app.api.app:app --host 127.0.0.1 --port 5000`,
+    cwd: root,
+    url: "http://127.0.0.1:5000",
+    reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
 });

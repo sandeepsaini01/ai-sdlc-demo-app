@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeSubmitPrompt": [
+      {
+        "command": "python .cursor/hooks/log_interaction.py beforeSubmitPrompt"
+      }
+    ],
+    "afterAgentResponse": [
+      {
+        "command": "python .cursor/hooks/log_interaction.py afterAgentResponse"
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "python .cursor/hooks/log_interaction.py afterFileEdit"
+      }
+    ],
+    "subagentStop": [
+      {
+        "command": "python .cursor/hooks/log_interaction.py subagentStop"
+      }
+    ]
+  }
+}

@@ -1,10 +1,10 @@
 # Invoice approval limits
 
-Python invoice approval service added alongside the workshop demo.
+Python implementation of the workshop invoice-approval demo, with role limits.
 
 A manager may sole-approve up to 50,000. A director may sole-approve up to 500,000. Above 500,000, two different directors must approve. A refused approval explains why and does not change the invoice.
 
-## Run the Python app
+## Run
 
 ```powershell
 python -m venv .venv
@@ -28,6 +28,10 @@ These are local demo accounts, not real credentials.
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest
+cd e2e
+npm install
+npx playwright install chromium
+npm test
 ```
 
-The original .NET demo is still under `backend/` and runs with `dotnet run --project backend/src/InvoiceApp.Api`.
+The specification is in `specs/001-role-approval-limits/`. Agent rules are in `AGENTS.md`.
