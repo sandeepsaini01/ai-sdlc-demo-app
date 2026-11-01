@@ -1,48 +1,37 @@
-# Invoice Approval Demo App
+# Invoice approval limits
 
-A small invoice approval app used for live AI-in-SDLC demos. It is deliberately simple: a .NET 8 API, a plain web UI, and an in-memory store, so it runs with one command and no database.
+Python implementation of the workshop invoice-approval demo, with role limits.
 
-## Run it
+A manager may sole-approve up to 50,000. A director may sole-approve up to 500,000. Above 500,000, two different directors must approve. A refused approval explains why and does not change the invoice.
 
+## Run
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m uvicorn invoice_app.api.app:app --host 127.0.0.1 --port 5000
 ```
-dotnet run --project backend/src/InvoiceApp.Api
-```
 
-Open http://localhost:5000 and sign in:
+Open http://127.0.0.1:5000. Demo password for every account: `ChangeMe123!`
 
-| User | Password | Role |
-| --- | --- | --- |
-| `demo.approver` | `ChangeMe123!` | Approver |
-| `demo.admin` | `ChangeMe123!` | Admin |
+| User | Role |
+| --- | --- |
+| `demo.manager` | Manager, ceiling 50,000 |
+| `demo.director` | Director, ceiling 500,000 |
+| `demo.director2` | Second director for invoices above 500,000 |
+| `demo.approver` | No approval authority |
+| `demo.admin` | Can delete, cannot approve |
 
-These are demo accounts for a local, in-memory app. They are not real credentials.
-
-## What it does
-
-1. Create an invoice (it starts as a draft).
-2. Submit it for approval.
-3. An approver approves it, or rejects it with a reason.
-
-Invoices move through Draft, Pending Approval, then Approved or Rejected.
+These are local demo accounts, not real credentials.
 
 ## Tests
 
-```
-dotnet test backend/InvoiceApp.sln
-```
-
-## Project layout
-
-```
-backend/
-  src/InvoiceApp.Domain   business rules
-  src/InvoiceApp.Api      controllers, sign-in, web UI (wwwroot)
-  tests/InvoiceApp.Tests  xUnit tests
-docs/use-cases            short feature briefs
-AGENTS.md                 conventions for AI coding agents
+```powershell
+.\.venv\Scripts\python.exe -m pytest
+cd e2e
+npm install
+npx playwright install chromium
+npm test
 ```
 
-## Use cases
-
-- [UC-1 Bulk invoice approval](docs/use-cases/UC-1-bulk-approval.md)
-- [UC-2 Partial approval](docs/use-cases/UC-2-partial-approval.md)
+The specification is in `specs/001-role-approval-limits/`. Agent rules are in `AGENTS.md`.

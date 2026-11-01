@@ -3,11 +3,9 @@
   "private": true,
   "scripts": {
     "test": "playwright test",
-    "test:headed": "playwright test --headed",
-    "report": "playwright show-report"
+    "test:headed": "playwright test --headed"
   },
   "devDependencies": {
-    "@playwright/test": "^1.49.0",
-    "@types/node": "^20.0.0"
+    "@playwright/test": "^1.49.0"
   }
 }

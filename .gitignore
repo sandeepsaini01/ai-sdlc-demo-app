@@ -8,3 +8,9 @@ node_modules/
 .env
 test-results/
 playwright-report/
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+blob-report/
+.mutmut-cache/
