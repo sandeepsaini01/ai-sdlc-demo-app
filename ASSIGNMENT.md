@@ -163,10 +163,8 @@ Record 8 to 10 minutes with something running, not a file reading.
 6. In a terminal, run `.\.venv\Scripts\python.exe -m pytest`.
 7. In `e2e`, run `npx playwright test` and show the passing over-limit test.
 
-Put the recording link here when it is uploaded:
-
 ```text
-Video: 
+Video: https://nagarro-my.sharepoint.com/:v:/r/personal/sandeep_saini01_nagarro_com/Documents/3183943_sandeep_saini_ai_in_sdlc.mp4?d=wb543e4df5e5a4364bb339b586b7c7fd9&csf=1&web=1&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=17MzUf
 ```
 
 ## Commits on this branch
@@ -175,4 +173,4 @@ Video:
 2. Require two different directors above 500,000.
 3. Add the end-to-end refusal test and this write-up.
 
-The pull request description is the "Pull request description" section above. The video link is still blank until the recording is uploaded.
+The pull request description is the "Pull request description" section above. The demo video link is in the section above.
